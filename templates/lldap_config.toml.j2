@@ -1,0 +1,33 @@
+## Managed by Ansible — changes will be overwritten.
+
+verbose = {{ lldap_verbose | lower }}
+
+http_port = {{ lldap_http_port }}
+ldap_port = {{ lldap_ldap_port }}
+
+ldap_base_dn = "{{ lldap_ldap_base_dn }}"
+ldap_user_dn = "{{ lldap_ldap_user_dn }}"
+ldap_user_email = "{{ lldap_ldap_user_email }}"
+ldap_user_pass = "{{ lldap_ldap_user_pass }}"
+
+jwt_secret = "{{ lldap_jwt_secret }}"
+key_seed = "{{ lldap_key_seed }}"
+
+database_url = "{{ lldap_database_url }}"
+
+{% if lldap_ldaps_options_enabled %}
+[ldaps_options]
+enabled = true
+{% endif %}
+
+{% if lldap_smtp_options_enabled %}
+[smtp_options]
+enable_password_reset = true
+server = "{{ lldap_smtp_server }}"
+port = {{ lldap_smtp_port }}
+tls_required = {{ lldap_smtp_tls_required | lower }}
+user = "{{ lldap_smtp_user }}"
+password = "{{ lldap_smtp_password }}"
+from = "{{ lldap_smtp_from }}"
+reply_to = "{{ lldap_smtp_reply_to }}"
+{% endif %}

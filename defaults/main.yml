@@ -1,0 +1,56 @@
+---
+# lldap release to install
+lldap_version: "0.6.1"
+
+# Where lldap gets installed
+lldap_install_dir: /opt/lldap
+lldap_config_dir: /etc/lldap
+lldap_data_dir: /var/lib/lldap
+lldap_binary_path: "{{ lldap_install_dir }}/lldap"
+
+# System user/group the service runs as
+lldap_user: lldap
+lldap_group: lldap
+lldap_manage_user: true
+
+# systemd service
+lldap_service_name: lldap
+lldap_service_enabled: true
+lldap_service_state: started
+
+# Download architecture mapping (uname -m -> release asset arch)
+lldap_arch_map:
+  x86_64: x86_64
+  aarch64: aarch64
+  arm64: aarch64
+
+# GitHub release asset naming: lldap_bin_<arch>-linux-gnu
+lldap_download_url: "https://github.com/lldap/lldap/releases/download/v{{ lldap_version }}/lldap_bin_{{ lldap_arch }}-linux-gnu"
+
+# --- lldap_config.toml settings ---
+# See https://github.com/lldap/lldap/blob/main/lldap_config.docker_template.toml
+lldap_http_port: 17170
+lldap_ldap_port: 3890
+lldap_ldaps_options_enabled: false
+
+lldap_ldap_base_dn: "dc=example,dc=com"
+lldap_ldap_user_dn: "admin"
+lldap_ldap_user_email: "admin@example.com"
+# Set this via vault/host_vars — no sane default for a password.
+lldap_ldap_user_pass: ""
+
+lldap_jwt_secret: ""
+lldap_key_seed: ""
+
+lldap_database_url: "sqlite://{{ lldap_data_dir }}/users.db?mode=rwc"
+
+lldap_smtp_options_enabled: false
+lldap_smtp_server: ""
+lldap_smtp_port: 587
+lldap_smtp_tls_required: true
+lldap_smtp_user: ""
+lldap_smtp_password: ""
+lldap_smtp_from: ""
+lldap_smtp_reply_to: ""
+
+lldap_verbose: false

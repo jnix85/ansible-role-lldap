@@ -1,0 +1,2 @@
+---
+lldap_arch: "{{ lldap_arch_map[ansible_architecture] | default(ansible_architecture) }}"

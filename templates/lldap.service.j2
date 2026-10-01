@@ -1,0 +1,22 @@
+## Managed by Ansible — changes will be overwritten.
+[Unit]
+Description=lldap - Light LDAP server
+After=network.target
+
+[Service]
+Type=simple
+User={{ lldap_user }}
+Group={{ lldap_group }}
+WorkingDirectory={{ lldap_data_dir }}
+ExecStart={{ lldap_binary_path }} run --config-file {{ lldap_config_dir }}/lldap_config.toml
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ lldap_data_dir }}
+
+[Install]
+WantedBy=multi-user.target

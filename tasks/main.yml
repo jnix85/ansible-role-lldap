@@ -1,0 +1,78 @@
+---
+- name: Assert required secrets are set
+  ansible.builtin.assert:
+    that:
+      - lldap_ldap_user_pass | length > 0
+      - lldap_jwt_secret | length > 0
+      - lldap_key_seed | length > 0
+    fail_msg: >-
+      lldap_ldap_user_pass, lldap_jwt_secret, and lldap_key_seed must all be
+      set (e.g. via vault or host_vars) before applying this role.
+
+- name: Create lldap group
+  ansible.builtin.group:
+    name: "{{ lldap_group }}"
+    system: true
+    state: present
+  when: lldap_manage_user
+
+- name: Create lldap user
+  ansible.builtin.user:
+    name: "{{ lldap_user }}"
+    group: "{{ lldap_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ lldap_data_dir }}"
+    create_home: false
+    state: present
+  when: lldap_manage_user
+
+- name: Create lldap directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ lldap_user }}"
+    group: "{{ lldap_group }}"
+    mode: "0750"
+  loop:
+    - "{{ lldap_install_dir }}"
+    - "{{ lldap_config_dir }}"
+    - "{{ lldap_data_dir }}"
+
+- name: Download lldap binary
+  ansible.builtin.get_url:
+    url: "{{ lldap_download_url }}"
+    dest: "{{ lldap_binary_path }}"
+    mode: "0750"
+    owner: "{{ lldap_user }}"
+    group: "{{ lldap_group }}"
+  register: lldap_download
+  notify: Restart lldap
+
+- name: Deploy lldap_config.toml
+  ansible.builtin.template:
+    src: lldap_config.toml.j2
+    dest: "{{ lldap_config_dir }}/lldap_config.toml"
+    owner: "{{ lldap_user }}"
+    group: "{{ lldap_group }}"
+    mode: "0640"
+  notify: Restart lldap
+
+- name: Deploy lldap systemd unit
+  ansible.builtin.template:
+    src: lldap.service.j2
+    dest: "/etc/systemd/system/{{ lldap_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lldap
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start lldap service
+  ansible.builtin.systemd:
+    name: "{{ lldap_service_name }}"
+    enabled: "{{ lldap_service_enabled }}"
+    state: "{{ lldap_service_state }}"
